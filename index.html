@@ -1,0 +1,1142 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTC - Repères de Vigilance | Dossier d'Exécution</title>
+
+    <!-- Tailwind CSS pour un design professionnel et responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome pour les icônes -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              ctc: {
+                blue: "#1e3a8a",
+                light: "#eff6ff",
+                accent: "#f59e0b",
+                dark: "#0f172a",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+      .section-content {
+        display: none;
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      .section-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      canvas {
+        border-radius: 0.5rem;
+        box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+        background-color: #ffffff;
+        width: 100%;
+      }
+
+      .checklist-item input:checked + label {
+        text-decoration: line-through;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body class="flex h-screen overflow-hidden text-slate-800">
+    <aside
+      class="w-64 bg-ctc-dark text-white flex flex-col h-full shadow-xl z-20 hidden md:flex flex-shrink-0"
+    >
+      <div class="p-6 border-b border-slate-700">
+        <div class="flex items-center gap-3 text-xl font-bold">
+          <i class="fa-solid fa-hard-hat text-ctc-accent"></i>
+          <span>D&E App</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">
+          Contrôle du Dossier d'Exécution
+        </p>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto py-4">
+        <ul class="space-y-1 px-3">
+          <li>
+            <button
+              onclick="navigate('accueil')"
+              id="nav-accueil"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors bg-ctc-blue text-white nav-btn"
+            >
+              <i class="fa-solid fa-home w-5 text-center"></i>
+              <span>Accueil & Principes</span>
+            </button>
+          </li>
+          <li>
+            <button
+              onclick="navigate('donnees')"
+              id="nav-donnees"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-800 transition-colors nav-btn"
+            >
+              <i class="fa-solid fa-folder-open w-5 text-center"></i>
+              <span>Analyse du Dossier</span>
+            </button>
+          </li>
+          <li>
+            <button
+              onclick="navigate('checklist')"
+              id="nav-checklist"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-800 transition-colors nav-btn"
+            >
+              <i class="fa-solid fa-list-check w-5 text-center"></i>
+              <span>Checklist de Contrôle</span>
+            </button>
+          </li>
+          <li>
+            <button
+              onclick="navigate('simulations')"
+              id="nav-simulations"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-800 transition-colors nav-btn"
+            >
+              <i class="fa-solid fa-desktop w-5 text-center"></i>
+              <span class="flex-1">Simulations d'Ingénierie</span>
+              <span
+                class="bg-ctc-accent text-xs font-bold px-2 py-0.5 rounded text-white"
+                >PRO</span
+              >
+            </button>
+          </li>
+          <li>
+            <button
+              onclick="navigate('vigilance')"
+              id="nav-vigilance"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-800 transition-colors nav-btn"
+            >
+              <i
+                class="fa-solid fa-triangle-exclamation text-rose-400 w-5 text-center"
+              ></i>
+              <span>Cas de Vigilance (19)</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div
+        class="p-4 border-t border-slate-700 text-xs text-slate-400 text-center"
+      >
+        Cours digitalisé — Conception : D&E <br />
+        Diagnostic & Expertise
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+      <!-- Header Mobile / Top bar -->
+      <header
+        class="bg-white shadow-sm z-10 p-4 flex items-center justify-between md:justify-end border-b border-slate-200"
+      >
+        <button
+          class="md:hidden text-slate-600"
+          onclick="
+            alert(
+              'Menu navigation mobile à implémenter dans une version complète.',
+            )
+          "
+        >
+          <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+        <div class="flex items-center gap-4">
+          <span class="text-sm font-medium text-slate-500"
+            ><i class="fa-regular fa-calendar mr-2"></i>Octobre 2026
+            (Digitalisé)</span
+          >
+          <div
+            class="h-8 w-8 rounded-full bg-ctc-blue text-white flex items-center justify-center font-bold"
+          >
+            D&E
+          </div>
+        </div>
+      </header>
+
+      <!-- Conteneur défilant -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-8">
+        <section id="accueil" class="section-content active max-w-5xl mx-auto">
+          <div
+            class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-8 relative overflow-hidden"
+          >
+            <div
+              class="absolute top-0 right-0 w-64 h-64 bg-ctc-light rounded-full -mt-20 -mr-20 z-0 opacity-50"
+            ></div>
+            <div class="relative z-10">
+              <span
+                class="text-ctc-blue font-semibold tracking-wider uppercase text-sm mb-2 block"
+                >Conférence D&E</span
+              >
+              <h1
+                class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 leading-tight"
+              >
+                Repères de Vigilance dans le Contrôle du Dossier d'Exécution
+              </h1>
+              <p class="text-slate-600 text-lg mb-6 max-w-3xl">
+                Une synthèse des bonnes pratiques et des pièges à éviter lors du
+                contrôle technique des structures, visant à réduire les
+                sinistres tout en garantissant la sécurité.
+              </p>
+              <div class="flex flex-wrap gap-4">
+                <div
+                  class="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-lg text-sm font-medium"
+                >
+                  <i class="fa-solid fa-user-tie text-slate-400"></i> Diagnostic
+                  & Expertise
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h2
+            class="text-2xl font-bold text-slate-800 mb-6 border-l-4 border-ctc-accent pl-3"
+          >
+            Principes Fondamentaux
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="h-12 w-12 bg-blue-100 text-ctc-blue rounded-lg flex items-center justify-center text-xl mb-4"
+              >
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <h3 class="text-lg font-bold mb-2">Objectif du Contrôle</h3>
+              <p class="text-slate-600 text-sm">
+                Normaliser le risque pour prévenir et réduire les sinistres
+                (garantie décennale). Assurer une sécurité suffisante au maître
+                de l'ouvrage tout en maintenant un équilibre économique.
+              </p>
+            </div>
+
+            <div
+              class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="h-12 w-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xl mb-4"
+              >
+                <i class="fa-solid fa-calculator"></i>
+              </div>
+              <h3 class="text-lg font-bold mb-2">Rôle de la Note de Calcul</h3>
+              <p class="text-slate-600 text-sm">
+                Étape intermédiaire entre hypothèses et dispositions. Bien
+                qu'elle ne soit pas approuvée en soi, son examen minutieux
+                définit le degré de soin à apporter au contrôle des plans.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="donnees" class="section-content max-w-5xl mx-auto">
+          <div class="mb-8">
+            <h2
+              class="text-2xl font-bold text-slate-800 mb-2 border-l-4 border-ctc-accent pl-3"
+            >
+              Constitution du Dossier
+            </h2>
+            <p class="text-slate-600">
+              Données à recueillir de chaque constituant indispensable.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Plans Archi -->
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+            >
+              <div
+                class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-3"
+              >
+                <i
+                  class="fa-solid fa-compass-drafting text-indigo-500 text-xl"
+                ></i>
+                <h3 class="font-bold text-slate-800">
+                  1. Plans d'Architecture
+                </h3>
+              </div>
+              <div class="p-6">
+                <h4
+                  class="font-semibold text-slate-700 text-sm uppercase tracking-wide mb-3"
+                >
+                  Plan de Masse
+                </h4>
+                <ul
+                  class="space-y-2 text-sm text-slate-600 mb-6 list-disc pl-5"
+                >
+                  <li>
+                    Disposition/orientation des blocs (idée sur la stabilité).
+                  </li>
+                  <li>
+                    Relief nécessitant des murs de soutènement (BA ou autre).
+                  </li>
+                  <li>
+                    Implantation des essais de sol (optimale et représentative
+                    ?).
+                  </li>
+                  <li>
+                    Proximité de voies de circulation près des soutènements.
+                  </li>
+                  <li>Respect des positions des joints pour les murs.</li>
+                </ul>
+
+                <h4
+                  class="font-semibold text-slate-700 text-sm uppercase tracking-wide mb-3"
+                >
+                  Plan d'Architecture
+                </h4>
+                <ul class="space-y-2 text-sm text-slate-600 list-disc pl-5">
+                  <li>Densité/nature des cloisons.</li>
+                  <li>Fonctionnalité (habitation, commerce...).</li>
+                  <li>Type de terrasses.</li>
+                  <li>
+                    <strong class="text-rose-500"
+                      >Conformité des dimensions</strong
+                    >
+                    avec le Génie-Civil (hauteurs, entraxes).
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Note de calcul & Sol -->
+            <div class="space-y-6">
+              <div
+                class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+              >
+                <div
+                  class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-3"
+                >
+                  <i
+                    class="fa-solid fa-square-root-variable text-emerald-500 text-xl"
+                  ></i>
+                  <h3 class="font-bold text-slate-800">2. Note de Calcul</h3>
+                </div>
+                <div class="p-6">
+                  <ul class="space-y-2 text-sm text-slate-600 list-disc pl-5">
+                    <li>Hypothèses de calcul adoptées.</li>
+                    <li>Charges et surcharges appliquées.</li>
+                    <li>
+                      Coefficients et facteurs sismiques (conformité RPA).
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div
+                class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+              >
+                <div
+                  class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-3"
+                >
+                  <i class="fa-solid fa-layer-group text-amber-600 text-xl"></i>
+                  <h3 class="font-bold text-slate-800">3. Rapport de Sol</h3>
+                </div>
+                <div class="p-6">
+                  <ul class="space-y-2 text-sm text-slate-600 list-disc pl-5">
+                    <li>Nombre et importance des essais.</li>
+                    <li>Adéquation du calcul de contrainte.</li>
+                    <li>Ancrage vs coupe géologique.</li>
+                    <li>
+                      Concordance du plan de masse (implantations des essais).
+                    </li>
+                    <li>Présence de la classification du site.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="checklist" class="section-content max-w-5xl mx-auto">
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h2
+                class="text-2xl font-bold text-slate-800 mb-2 border-l-4 border-ctc-accent pl-3"
+              >
+                Actes de Contrôle RPA & Structures
+              </h2>
+              <p class="text-slate-600">
+                Checklist opérationnelle pour valider la conformité de la
+                modélisation.
+              </p>
+            </div>
+            <button
+              onclick="resetChecklist()"
+              class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 px-4 rounded transition-colors"
+            >
+              <i class="fa-solid fa-rotate-right mr-1"></i> Réinitialiser
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- RPA Item -->
+            <div
+              class="bg-white border border-slate-200 rounded-lg p-4 flex gap-4 items-start shadow-sm hover:border-ctc-blue transition-colors checklist-item"
+            >
+              <input
+                type="checkbox"
+                id="chk1"
+                class="mt-1 w-5 h-5 rounded border-slate-300 text-ctc-blue focus:ring-ctc-blue cursor-pointer"
+              />
+              <label for="chk1" class="cursor-pointer flex-1">
+                <span class="font-bold text-slate-800 block mb-1"
+                  >1. Classification du Site (RPA)</span
+                >
+                <span class="text-sm text-slate-600"
+                  >Vérifier si le site est bien classé selon les données
+                  géotechniques. En cas de doute, classer dans la catégorie
+                  immédiatement la plus défavorable.</span
+                >
+              </label>
+            </div>
+
+            <!-- Investigations Sol Item -->
+            <div
+              class="bg-white border border-slate-200 rounded-lg p-4 flex gap-4 items-start shadow-sm hover:border-ctc-blue transition-colors checklist-item"
+            >
+              <input
+                type="checkbox"
+                id="chk2"
+                class="mt-1 w-5 h-5 rounded border-slate-300 text-ctc-blue focus:ring-ctc-blue cursor-pointer"
+              />
+              <label for="chk2" class="cursor-pointer flex-1">
+                <span class="font-bold text-slate-800 block mb-1"
+                  >2. Investigations approfondies (Sols instables)</span
+                >
+                <span class="text-sm text-slate-600 block mb-2"
+                  >Vérifier la présence de :</span
+                >
+                <ul class="text-xs text-slate-500 list-disc pl-5 space-y-1">
+                  <li>
+                    Sols liquéfiables, faiblement cimentés, anciens remblais.
+                  </li>
+                  <li>
+                    Sols vaseux ou argiles très organiques (>3m d'épaisseur).
+                  </li>
+                  <li>Argiles très plastiques (IP > 75) sur >6m.</li>
+                  <li>Couche d'argile molle à moyennement raide sur >30m.</li>
+                </ul>
+              </label>
+            </div>
+
+            <!-- Spectre Item -->
+            <div
+              class="bg-white border border-slate-200 rounded-lg p-4 flex gap-4 items-start shadow-sm hover:border-ctc-blue transition-colors checklist-item"
+            >
+              <input
+                type="checkbox"
+                id="chk3"
+                class="mt-1 w-5 h-5 rounded border-slate-300 text-ctc-blue focus:ring-ctc-blue cursor-pointer"
+              />
+              <label for="chk3" class="cursor-pointer flex-1">
+                <span class="font-bold text-slate-800 block mb-1"
+                  >3. Validation du Spectre de Calcul</span
+                >
+                <span class="text-sm text-slate-600"
+                  >Le spectre reflète-t-il les conditions de sol,
+                  contreventement, zonage et matériaux ?
+                  <strong class="text-rose-500"
+                    >Attention au coefficient de comportement R</strong
+                  >
+                  injecté.</span
+                >
+              </label>
+            </div>
+
+            <!-- Joints Item -->
+            <div
+              class="bg-white border border-slate-200 rounded-lg p-4 flex gap-4 items-start shadow-sm hover:border-ctc-blue transition-colors checklist-item"
+            >
+              <input
+                type="checkbox"
+                id="chk4"
+                class="mt-1 w-5 h-5 rounded border-slate-300 text-ctc-blue focus:ring-ctc-blue cursor-pointer"
+              />
+              <label for="chk4" class="cursor-pointer flex-1">
+                <span class="font-bold text-slate-800 block mb-1"
+                  >4. Compatibilité des Joints Sismiques</span
+                >
+                <span class="text-sm text-slate-600"
+                  >Vérifier l'espacement par rapport aux déplacements obtenus
+                  par le calcul dynamique.</span
+                >
+              </label>
+            </div>
+
+            <!-- Aciers Item -->
+            <div
+              class="bg-white border border-slate-200 rounded-lg p-4 flex gap-4 items-start shadow-sm hover:border-ctc-blue transition-colors checklist-item"
+            >
+              <input
+                type="checkbox"
+                id="chk5"
+                class="mt-1 w-5 h-5 rounded border-slate-300 text-ctc-blue focus:ring-ctc-blue cursor-pointer"
+              />
+              <label for="chk5" class="cursor-pointer flex-1">
+                <span class="font-bold text-slate-800 block mb-1"
+                  >5. Limites et Combinaisons (Coffrage & Ferraillage)</span
+                >
+                <span class="text-sm text-slate-600"
+                  >Les sections d'acier sont-elles dans la fourchette RPA ?
+                  Sont-elles issues de la bonne combinaison d'actions ? Vérifier
+                  la position des aciers de répartition (int. pour soutènement,
+                  ext. pour contreventement).</span
+                >
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section id="simulations" class="section-content max-w-6xl mx-auto">
+          <div class="mb-8">
+            <h2
+              class="text-2xl font-bold text-slate-800 mb-2 border-l-4 border-ctc-accent pl-3"
+            >
+              Outils & Simulations
+            </h2>
+            <p class="text-slate-600">
+              Simulations interactives démontrant les effets physiques liés aux
+              erreurs de conception courantes (Points de vigilance N°11 et
+              N°14).
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Sim 1: Mur de soutènement -->
+            <div
+              class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col"
+            >
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-800">
+                  <i class="fa-solid fa-water text-blue-500 mr-2"></i> Stabilité
+                  au Glissement (Mur)
+                </h3>
+                <span
+                  class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500"
+                  >Ref: Point 11</span
+                >
+              </div>
+              <p class="text-sm text-slate-600 mb-4">
+                La bêche n'absorbe pas n'importe quel degré d'instabilité.
+                Modifiez la poussée pour voir l'effet du glissement.
+              </p>
+
+              <div
+                class="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-4 flex-1"
+              >
+                <canvas id="wallCanvas" height="250" class="w-full"></canvas>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <label class="font-medium text-slate-700"
+                      >Poussée des terres / Surcharge routière</label
+                    >
+                    <span id="forceValue" class="font-bold text-ctc-blue"
+                      >Faible</span
+                    >
+                  </div>
+                  <input
+                    type="range"
+                    id="wallForce"
+                    min="1"
+                    max="100"
+                    value="20"
+                    class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-ctc-accent"
+                  />
+                </div>
+                <div
+                  class="p-3 rounded bg-blue-50 text-blue-800 text-sm flex gap-2 items-start"
+                  id="wallStatus"
+                >
+                  <i class="fa-solid fa-circle-check mt-0.5"></i>
+                  <span
+                    >Coefficient de sécurité au glissement acceptable. Le mur
+                    est stable.</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Sim 2: Joint sismique -->
+            <div
+              class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col"
+            >
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-800">
+                  <i class="fa-solid fa-house-crack text-rose-500 mr-2"></i>
+                  Effet de Martèlement (Entre-choc)
+                </h3>
+                <span
+                  class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500"
+                  >Ref: Point 14 & 3</span
+                >
+              </div>
+              <p class="text-sm text-slate-600 mb-4">
+                Ignorer les caractéristiques du bloc existant (périodes
+                différentes) mène à un mauvais dimensionnement du joint.
+              </p>
+
+              <div
+                class="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-4 flex-1"
+              >
+                <canvas id="seismicCanvas" height="250" class="w-full"></canvas>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <label class="font-medium text-slate-700"
+                      >Intensité Sismique (Accélération)</label
+                    >
+                    <span id="quakeValue" class="font-bold text-ctc-blue"
+                      >Repos</span
+                    >
+                  </div>
+                  <input
+                    type="range"
+                    id="quakeForce"
+                    min="0"
+                    max="100"
+                    value="0"
+                    class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-ctc-accent"
+                  />
+                </div>
+                <div class="flex items-center gap-4">
+                  <label
+                    class="text-sm font-medium text-slate-700 whitespace-nowrap"
+                    >Largeur du Joint:</label
+                  >
+                  <select
+                    id="jointWidth"
+                    class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded focus:ring-ctc-blue focus:border-ctc-blue block w-full p-2"
+                  >
+                    <option value="large">
+                      Réglementaire (Calculé D = Δ1 + Δ2)
+                    </option>
+                    <option value="small">
+                      Insuffisant (Ignorance du bloc mitoyen)
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="vigilance" class="section-content max-w-5xl mx-auto">
+          <div class="mb-8">
+            <h2
+              class="text-2xl font-bold text-slate-800 mb-2 border-l-4 border-rose-500 pl-3"
+            >
+              Cas Pouvant Échapper à la Vigilance
+            </h2>
+            <p class="text-slate-600">
+              Les 19 cas critiques nécessitant l'attention particulière de
+              l'ingénieur contrôleur.
+            </p>
+          </div>
+
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            id="vigilance-grid"
+          >
+            <!-- Généré dynamiquement en JS pour garder le code propre, mais je mets quelques exemples vitrines en dur -->
+
+            <div
+              class="bg-rose-50 border border-rose-100 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold mb-3"
+              >
+                1
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Gros Béton sous Fondations
+              </h4>
+              <p class="text-xs text-slate-600">
+                Le poids supplémentaire du gros béton de rattrapage sur un sol
+                de faible portance risque de provoquer une rupture.
+              </p>
+            </div>
+
+            <div
+              class="bg-rose-50 border border-rose-100 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold mb-3"
+              >
+                2
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Poids des Terres ignoré
+              </h4>
+              <p class="text-xs text-slate-600">
+                Négligence de la prise en compte du poids des terres sur les
+                fondations (surtout en cas de profondeur importante).
+              </p>
+            </div>
+
+            <div
+              class="bg-rose-50 border border-rose-100 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold mb-3"
+              >
+                3
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Murs Plaqués ≠ Soutènement
+              </h4>
+              <p class="text-xs text-slate-600">
+                Les murs plaqués à la structure ne doivent en aucun cas être
+                calculés comme murs de soutènement.
+              </p>
+            </div>
+
+            <div
+              class="bg-amber-50 border border-amber-100 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center font-bold mb-3"
+              >
+                7
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Absence de Plan d'Assemblage
+              </h4>
+              <p class="text-xs text-slate-600">
+                Blocs juxtaposés étudiés séparément sans plan indiquant la
+                nature et les dimensions des joints sismiques.
+              </p>
+            </div>
+
+            <div
+              class="bg-amber-50 border border-amber-100 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center font-bold mb-3"
+              >
+                8
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Contrainte Labo erronée
+              </h4>
+              <p class="text-xs text-slate-600">
+                L'ingénieur doit vérifier les calculs d'où découle la contrainte
+                admissible donnée par le laboratoire. Une erreur remet tout en
+                cause.
+              </p>
+            </div>
+
+            <div
+              class="bg-amber-50 border border-amber-100 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center font-bold mb-3"
+              >
+                10
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Soutènement sans Plan de Masse
+              </h4>
+              <p class="text-xs text-slate-600">
+                Dossiers de murs sans coupes, omettant l'effet de fortes
+                surcharges routières (dimensionnement passant du simple au
+                double).
+              </p>
+            </div>
+
+            <div
+              class="bg-slate-100 border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center font-bold mb-3"
+              >
+                16
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                L'illusion de la "Simple adaptation"
+              </h4>
+              <p class="text-xs text-slate-600">
+                L'adaptation au sol concerne aussi la superstructure (réponse
+                sismique). La "simple adaptation au sol" n'existe pas en
+                réalité.
+              </p>
+            </div>
+
+            <div
+              class="bg-slate-100 border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center font-bold mb-3"
+              >
+                17
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Fondations sur pieux
+              </h4>
+              <p class="text-xs text-slate-600">
+                Ne pas se limiter au contrôle d'un seul pieu. La répartition des
+                efforts sous le radier est souvent erronée.
+              </p>
+            </div>
+
+            <div
+              class="bg-slate-100 border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center font-bold mb-3"
+              >
+                19
+              </div>
+              <h4 class="font-bold text-slate-800 mb-2 text-sm">
+                Standardisation abusive
+              </h4>
+              <p class="text-xs text-slate-600">
+                Généraliser le ferraillage des longrines ou l'espacement des
+                cadres. L'effort normal de traction peut varier de 1 à 10 selon
+                le bloc.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="mt-8 bg-blue-50 border border-blue-200 p-6 rounded-xl text-center"
+          >
+            <p class="text-blue-800 text-sm italic">
+              "Nous appelons l'ensemble des contrôleurs à un large échange
+              d'expérience afin de pouvoir scinder le maximum de cas de
+              vigilance dans le contrôle de dossier d'exécution."
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      // --- Navigation Logic ---
+      function navigate(sectionId) {
+        // Cacher toutes les sections
+        document.querySelectorAll(".section-content").forEach((el) => {
+          el.classList.remove("active");
+        });
+
+        // Afficher la section cible
+        document.getElementById(sectionId).classList.add("active");
+
+        // Mettre à jour le style des boutons
+        document.querySelectorAll(".nav-btn").forEach((btn) => {
+          btn.classList.remove("bg-ctc-blue", "text-white");
+          btn.classList.add("text-slate-300");
+        });
+
+        let activeBtn = document.getElementById("nav-" + sectionId);
+        activeBtn.classList.remove("text-slate-300");
+        activeBtn.classList.add("bg-ctc-blue", "text-white");
+
+        // Resize canvas if switching to simulations
+        if (sectionId === "simulations") {
+          setTimeout(() => {
+            initWallCanvas();
+            initSeismicCanvas();
+          }, 100);
+        }
+      }
+
+      // --- Checklist Logic ---
+      function resetChecklist() {
+        document
+          .querySelectorAll('.checklist-item input[type="checkbox"]')
+          .forEach((chk) => {
+            chk.checked = false;
+          });
+      }
+
+      // --- Simulation 1: Mur de soutènement ---
+      const wallCanvas = document.getElementById("wallCanvas");
+      const wallCtx = wallCanvas.getContext("2d");
+      const wallSlider = document.getElementById("wallForce");
+      const wallStatus = document.getElementById("wallStatus");
+      const forceValueTxt = document.getElementById("forceValue");
+
+      function initWallCanvas() {
+        wallCanvas.width = wallCanvas.parentElement.clientWidth;
+        drawWallSim();
+      }
+
+      function drawWallSim() {
+        const width = wallCanvas.width;
+        const height = wallCanvas.height;
+        const force = parseInt(wallSlider.value);
+
+        wallCtx.clearRect(0, 0, width, height);
+
+        // Threshold for failure (slide)
+        const failureThreshold = 75;
+        const hasFailed = force > failureThreshold;
+        const offsetX = hasFailed
+          ? Math.min(20, force - failureThreshold) * 1.5
+          : 0;
+        const rotation = hasFailed ? (force - failureThreshold) * 0.005 : 0;
+
+        // Draw Ground
+        wallCtx.fillStyle = "#d1d5db"; // soil color left
+        wallCtx.fillRect(0, height - 40, width, 40);
+
+        wallCtx.fillStyle = "#a3a8b4"; // soil color right (retained)
+        wallCtx.fillRect(width / 2 + offsetX, 60, width, height);
+
+        wallCtx.save();
+        wallCtx.translate(width / 2 + offsetX, height - 40);
+        wallCtx.rotate(rotation);
+
+        // Draw Wall (T-shaped with shear key / bêche)
+        wallCtx.fillStyle = "#64748b"; // Concrete
+        // Stem
+        wallCtx.fillRect(-20, -140, 40, 140);
+        // Footing
+        wallCtx.fillRect(-70, 0, 140, 20);
+        // Bêche (Shear Key)
+        wallCtx.fillRect(-10, 20, 20, 30);
+
+        wallCtx.restore();
+
+        // Draw Force Arrows
+        wallCtx.fillStyle = "rgba(225, 29, 72, 0.7)"; // Red arrows
+        const arrowBaseX = width / 2 + 20 + offsetX;
+        const forceWidth = 20 + force * 1.5;
+
+        for (let i = 0; i < 4; i++) {
+          let yPos = 180 - i * 35;
+          let currentForceW = forceWidth * (1 - i * 0.15); // Triangular distribution
+
+          wallCtx.beginPath();
+          wallCtx.moveTo(arrowBaseX + currentForceW, yPos);
+          wallCtx.lineTo(arrowBaseX, yPos);
+          wallCtx.lineTo(arrowBaseX + 10, yPos - 5);
+          wallCtx.moveTo(arrowBaseX, yPos);
+          wallCtx.lineTo(arrowBaseX + 10, yPos + 5);
+          wallCtx.strokeStyle = "rgba(225, 29, 72, 0.8)";
+          wallCtx.lineWidth = 3;
+          wallCtx.stroke();
+        }
+
+        // Update UI
+        if (force < 40) {
+          forceValueTxt.innerText = "Faible";
+          forceValueTxt.className = "font-bold text-emerald-600";
+          wallStatus.className =
+            "p-3 rounded bg-emerald-50 text-emerald-800 text-sm flex gap-2 items-start";
+          wallStatus.innerHTML =
+            '<i class="fa-solid fa-shield-check mt-0.5"></i><span>Coefficient de sécurité au glissement acceptable. Le mur est stable.</span>';
+        } else if (force < failureThreshold) {
+          forceValueTxt.innerText = "Modérée";
+          forceValueTxt.className = "font-bold text-amber-500";
+          wallStatus.className =
+            "p-3 rounded bg-amber-50 text-amber-800 text-sm flex gap-2 items-start";
+          wallStatus.innerHTML =
+            '<i class="fa-solid fa-triangle-exclamation mt-0.5"></i><span>La bêche commence à être fortement sollicitée. Coefficient limite.</span>';
+        } else {
+          forceValueTxt.innerText = "Critique (Surcharge !)";
+          forceValueTxt.className = "font-bold text-rose-600";
+          wallStatus.className =
+            "p-3 rounded bg-rose-50 text-rose-800 text-sm flex gap-2 items-start border border-rose-200 shadow-sm";
+          wallStatus.innerHTML =
+            '<i class="fa-solid fa-xmark mt-0.5"></i><span><strong>Rupture!</strong> Glissement avéré. Poussée des terres ou surcharge routière non prise en compte.</span>';
+        }
+      }
+
+      wallSlider.addEventListener("input", drawWallSim);
+
+      // --- Simulation 2: Joint Sismique ---
+      const quakeCanvas = document.getElementById("seismicCanvas");
+      const quakeCtx = quakeCanvas.getContext("2d");
+      const quakeSlider = document.getElementById("quakeForce");
+      const jointSelect = document.getElementById("jointWidth");
+      const quakeValueTxt = document.getElementById("quakeValue");
+
+      let quakeAnimId;
+      let time = 0;
+
+      function initSeismicCanvas() {
+        quakeCanvas.width = quakeCanvas.parentElement.clientWidth;
+        if (quakeAnimId) cancelAnimationFrame(quakeAnimId);
+        animateSeismic();
+      }
+
+      function animateSeismic() {
+        const width = quakeCanvas.width;
+        const height = quakeCanvas.height;
+        const intensity = parseInt(quakeSlider.value) / 100; // 0 to 1
+        const isSmallJoint = jointSelect.value === "small";
+
+        quakeCtx.clearRect(0, 0, width, height);
+
+        // Ground
+        quakeCtx.fillStyle = "#94a3b8";
+        quakeCtx.fillRect(0, height - 20, width, 20);
+
+        // Base position and joint
+        const centerX = width / 2;
+        const baseJointWidth = isSmallJoint ? 15 : 60;
+
+        // Building A (Tall, flexible - longer period)
+        const bA_width = 80;
+        const bA_height = 180;
+        const bA_x = centerX - bA_width - baseJointWidth / 2;
+
+        // Building B (Short, stiff - shorter period)
+        const bB_width = 100;
+        const bB_height = 90;
+        const bB_x = centerX + baseJointWidth / 2;
+
+        // Calculate Displacements (different frequencies to simulate phase difference)
+        // Displacement = intensity * max_deflection * sin(time * frequency)
+        // Block A deflections are larger at the top
+        time += 0.05;
+
+        let defTopA = intensity * 40 * Math.sin(time * 0.8);
+        let defTopB = intensity * 15 * Math.sin(time * 1.5); // Faster, stiffer
+
+        // Check collision at the height of Building B (y = height - 20 - bB_height)
+        // Interpolate Deflection A at Building B's height
+        let heightRatioB = bB_height / bA_height;
+        let defA_at_B = defTopA * heightRatioB;
+
+        let rightEdgeA = bA_x + bA_width + defA_at_B;
+        let leftEdgeB = bB_x + defTopB;
+
+        let isColliding = rightEdgeA >= leftEdgeB;
+
+        // Draw Building A
+        quakeCtx.beginPath();
+        quakeCtx.moveTo(bA_x, height - 20); // bottom left
+        quakeCtx.lineTo(bA_x + bA_width, height - 20); // bottom right
+        quakeCtx.lineTo(bA_x + bA_width + defTopA, height - 20 - bA_height); // top right
+        quakeCtx.lineTo(bA_x + defTopA, height - 20 - bA_height); // top left
+        quakeCtx.closePath();
+        quakeCtx.fillStyle = "rgba(59, 130, 246, 0.8)"; // Blue
+        quakeCtx.fill();
+        quakeCtx.strokeStyle = "#1d4ed8";
+        quakeCtx.stroke();
+
+        // Draw Building B
+        quakeCtx.beginPath();
+        quakeCtx.moveTo(bB_x, height - 20); // bottom left
+        quakeCtx.lineTo(bB_x + bB_width, height - 20); // bottom right
+        quakeCtx.lineTo(bB_x + bB_width + defTopB, height - 20 - bB_height); // top right
+        quakeCtx.lineTo(bB_x + defTopB, height - 20 - bB_height); // top left
+        quakeCtx.closePath();
+        quakeCtx.fillStyle = "rgba(16, 185, 129, 0.8)"; // Emerald
+        quakeCtx.fill();
+        quakeCtx.strokeStyle = "#047857";
+        quakeCtx.stroke();
+
+        // Collision Effect
+        if (isColliding && intensity > 0) {
+          // Flash red at contact point
+          quakeCtx.beginPath();
+          quakeCtx.arc(
+            rightEdgeA,
+            height - 20 - bB_height,
+            15 + Math.random() * 10,
+            0,
+            Math.PI * 2,
+          );
+          quakeCtx.fillStyle = "rgba(225, 29, 72, 0.6)";
+          quakeCtx.fill();
+
+          // Shake canvas slightly (visual trick)
+          quakeCanvas.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+        } else {
+          quakeCanvas.style.transform = "translate(0px, 0px)";
+        }
+
+        // UI Updates
+        if (intensity === 0) {
+          quakeValueTxt.innerText = "Repos";
+          quakeValueTxt.className = "font-bold text-slate-500";
+        } else if (intensity < 0.5) {
+          quakeValueTxt.innerText = "Séisme Mineur";
+          quakeValueTxt.className = "font-bold text-amber-500";
+        } else {
+          quakeValueTxt.innerText = "Séisme Majeur";
+          quakeValueTxt.className = "font-bold text-rose-600";
+        }
+
+        quakeAnimId = requestAnimationFrame(animateSeismic);
+      }
+
+      quakeSlider.addEventListener("input", () => {
+        if (!quakeAnimId) animateSeismic();
+      });
+      jointSelect.addEventListener("change", () => {
+        if (!quakeAnimId) animateSeismic();
+      });
+
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        if (
+          document.getElementById("simulations").classList.contains("active")
+        ) {
+          initWallCanvas();
+          initSeismicCanvas();
+        }
+      });
+    </script>
+  </body>
+</html>
